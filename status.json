@@ -1,0 +1,51 @@
+{
+ "updated": "2026-11-06 10:45",
+ "latest_day": "261105T1214",
+ "calib_date": "261105",
+ "trend_dir": "/media/disk_b/praveen/lightYieldAnalysis_praveen/light_yield_plots_without_PMT_34/orig_trend_plots_py_260501_261106",
+ "run2_dir": "/media/disk_b/praveen/lightYieldAnalysis_praveen/light_yield_plots_without_PMT_34/runII_trend_plots_py_261017_261106",
+ "run2_start": "261017",
+ "fit_days": [
+  "261016T1751",
+  "261018T1751",
+  "261019T1751",
+  "261020T1751",
+  "261021T1751",
+  "261022T1751",
+  "261023T1751",
+  "261024T1751",
+  "261025T1751",
+  "261026T1147",
+  "261027T1342",
+  "261028T1321",
+  "261029T1130",
+  "261030T1148",
+  "261031T1148",
+  "261101T1148",
+  "261102T1050",
+  "261103T1226",
+  "261104T1503",
+  "261105T1214"
+ ],
+ "latest": {
+  "bottom": [
+   "261105T1214",
+   {
+    "mpv": 1010.21,
+    "err": 12.88,
+    "n": 601,
+    "stamp": "261106T1214"
+   }
+  ],
+  "side": [
+   "261105T1214",
+   {
+    "mpv": 1714.06,
+    "err": 12.12,
+    "n": 601,
+    "stamp": "261106T1214"
+   }
+  ]
+ },
+ "missing": []
+}
