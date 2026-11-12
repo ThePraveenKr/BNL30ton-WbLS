@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BNL 30t WbLS Monitor</title>
+<link rel="icon" type="image/png" href="favicon.png?v=202611121001">
+<meta name="description" content="Daily light-yield and calibration monitoring of the BNL 30-ton WbLS demonstrator">
+<style>
+:root{color-scheme:light;--bg:#fff;--card:#fff;--fg:#000;--mut:#4b5563;--line:#e1e4e8;--acc:#1d4ed8;--acc2:#e8eefc;
+ --r2a:#7c3aed;--r2b:#db2777;--r1a:#c2410c;--r1b:#f59e0b;--tank:#9aa3ad;--liq:#dbeafe;--pmt:#d97706;--pmtc:#9ca3af;--pad:#16a34a;--mu:#dc2626;--dn:#b91c1c;--up:#15803d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:linear-gradient(120deg,#0b1736 0%,#13306e 55%,#1d4ed8 120%);color:#fff;position:sticky;top:0;z-index:5;
+ box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.hd{max-width:1500px;margin:0 auto;padding:16px 16px 0}
+.brand{display:flex;align-items:stretch;gap:18px}
+.brand .hr{flex:1;min-width:0}
+.brand .lg{flex:0 0 auto;position:relative;width:118px;margin:-8px 0 8px}
+.brand .logo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:12px;background:#13306e;
+ box-shadow:0 0 0 2px rgba(147,197,253,.45),0 4px 12px rgba(0,0,0,.35)}
+@media (max-width:700px){.brand{gap:10px}.brand .lg{width:60px}}
+h1{font-size:21px;margin:0;letter-spacing:.2px;color:#fff}
+.meta{display:flex;flex-wrap:wrap;gap:2px 22px;color:#b9c6e4;font-size:13px;margin:4px 0 12px}
+.meta b{color:#fff;font-weight:600}
+nav{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 2px 12px}
+nav a{--c:#2563eb;padding:7px 16px;border-radius:6px;color:#fff;background:var(--c);text-decoration:none;
+ white-space:nowrap;font-weight:600;border:1px solid rgba(255,255,255,.22);box-shadow:0 1px 4px rgba(0,0,0,.3);
+ opacity:.85;transition:opacity .15s,transform .15s}
+nav a:hover{opacity:1;transform:translateY(-1px)}
+nav a[aria-current=page]{opacity:1;background:#fff;color:#13306e;border-color:#fff;
+ box-shadow:0 0 0 3px rgba(255,255,255,.35),0 2px 8px rgba(0,0,0,.35)}
+nav a.hl[aria-current=page]{background:#fff;color:#7c3aed;box-shadow:0 0 0 3px rgba(236,72,153,.55),0 2px 8px rgba(0,0,0,.35)}
+main{max-width:1500px;margin:0 auto;padding:20px 16px 48px}
+.tab{display:none} .tab.on{display:block}
+h2{font-size:19px;margin:4px 0 14px} h3{font-size:16px;margin:22px 0 8px}
+figure{margin:0 0 18px;background:#1a1d21;color:#e8eaed;border:1px solid #2c3036;border-radius:10px;padding:12px}
+figcaption{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;margin-bottom:8px}
+figcaption b{color:#fff} figcaption span{color:#9aa1a9;font-size:13px}
+img{width:100%;height:auto;display:block;border-radius:6px;background:#fff}
+.mut{color:var(--mut)} .warn{background:var(--card);border:1px dashed var(--line);padding:14px;border-radius:8px;color:var(--mut)}
+.ov{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 20px}
+.card p:first-child{margin-top:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:0 0 20px}
+.tile{display:block;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:inherit;text-decoration:none}
+.tile:hover{border-color:var(--acc)}
+.tile{box-shadow:0 1px 4px rgba(19,48,110,.08);transition:box-shadow .15s,transform .15s}
+.tile:hover{box-shadow:0 4px 12px rgba(19,48,110,.16);transform:translateY(-1px)}
+.tiles .tile{background:linear-gradient(135deg,#f5f7fb,#e9eef5);border-color:#d3dbe7;border-left:5px solid #8fa3c0}
+.lab{color:var(--mut);font-size:13px} .num{font-size:30px;font-weight:650;font-variant-numeric:tabular-nums;line-height:1.2}
+.num small{font-size:16px;color:var(--mut);font-weight:500} .sub{font-size:13px;color:var(--mut)}
+.dn{color:var(--dn)} .up{color:var(--up)}
+.diagram{width:100%;max-width:520px;display:block;margin:0 auto}
+.diagram .tank{fill:none;stroke:var(--tank);stroke-width:5} .diagram .liq{fill:var(--liq)}
+.diagram .surf{stroke:var(--acc);stroke-width:1.5;stroke-dasharray:6 4}
+.diagram .pmt circle{fill:var(--pmt)} .diagram .pmtc{fill:var(--pmtc)}
+.diagram .pad{fill:var(--pad)} .diagram .muon{stroke:var(--mu);stroke-width:2.5;stroke-dasharray:7 5}
+.diagram .lbl text{fill:var(--fg);font-size:13px} .diagram .big{font-size:22px;font-weight:600;fill:var(--acc)!important}
+.diagram .mut2{fill:var(--mut)!important;font-size:12px!important} .diagram .mutext{fill:var(--mu)!important}
+.diagram .ldr{stroke:var(--mut);stroke-width:1}
+.cap{text-align:center;font-size:12px;margin:4px 0 0}
+.tw{overflow-x:auto;margin:4px 0 6px}
+table{border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #c9d6ee;border-radius:10px;
+ overflow:hidden;min-width:420px;box-shadow:0 1px 4px rgba(19,48,110,.10)}
+th,td{padding:7px 14px;text-align:left;font-size:14px;border-bottom:1px solid #e3eaf7}
+thead th{background:linear-gradient(120deg,#13306e,#1d4ed8);color:#fff;font-weight:600;border-bottom:0}
+tbody tr:nth-child(even) td{background:#f2f6fd}
+tbody tr:hover td{background:#e3ecfb}
+tbody td:first-child{font-weight:600;color:#13306e}
+.r{text-align:right;font-variant-numeric:tabular-nums} tbody tr:last-child td{border-bottom:0}
+.ctl{display:flex;align-items:center;gap:8px;margin:0 0 14px}
+select,button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+button{cursor:pointer;min-width:38px} button:disabled{opacity:.4;cursor:default}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px}
+.grid2 img{max-width:620px;margin:0 auto}
+nav a.hl{--c:var(--r2a);background:linear-gradient(135deg,var(--r2a),var(--r2b));font-weight:700}
+nav a.hl1{--c:var(--r1a);background:linear-gradient(135deg,var(--r1a),var(--r1b))}
+nav a.hl1[aria-current=page]{background:#fff;color:#c2410c;box-shadow:0 0 0 3px rgba(245,158,11,.6),0 2px 8px rgba(0,0,0,.35)}
+.banner.b1{background:linear-gradient(135deg,var(--r1a),var(--r1b))}
+.banner{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:12px 18px;margin:0 0 16px;border-radius:10px;
+ color:#fff;background:linear-gradient(135deg,var(--r2a),var(--r2b))}
+.banner b{font-size:20px} .banner span{opacity:.92}
+.small{font-size:12.5px;margin:6px 0}
+footer{color:var(--mut);font-size:13px;margin-top:28px}
+.notes{background:#f6f9ff;border:1px solid #c9d6ee;border-left:5px solid #1d4ed8;border-radius:10px;
+ padding:12px 18px;margin:-6px 0 22px;box-shadow:0 1px 4px rgba(19,48,110,.08)}
+.notes .nh{font-weight:700;color:#13306e;margin-bottom:6px;font-size:15px}
+.notes ul{list-style:none;margin:0;padding:0}
+.notes li{display:flex;gap:14px;padding:6px 0;border-top:1px solid #e3eaf7;line-height:1.5}
+.notes li:first-child{border-top:0}
+.notes .nd{flex:0 0 96px;font-weight:700;color:#1d4ed8;font-variant-numeric:tabular-nums}
+@media (max-width:600px){.notes li{flex-direction:column;gap:2px}}
+.nfc{margin-top:24px}
+.nfdate{color:#d10000;font-weight:800;font-size:17px;margin:4px 0 10px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.flow .fb{background:linear-gradient(120deg,#13306e,#1d4ed8);color:#fff;border-radius:8px;
+ padding:8px 12px;font-size:13px;line-height:1.35;text-align:center;min-width:120px}
+.flow .fb small{opacity:.85}
+.flow .fa{color:#1d4ed8;font-size:22px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}
+.chip{border:1px solid #c9d6ee;background:#f2f6fd;color:#13306e;border-radius:6px;padding:4px 10px;
+ font-size:13px;cursor:pointer;font-variant-numeric:tabular-nums}
+.chip:hover{background:#e3ecfb}
+.chip.on{background:linear-gradient(120deg,#13306e,#1d4ed8);color:#fff;border-color:#13306e}
+.pe{font-size:13px;font-weight:400;color:var(--mut);white-space:nowrap}
+.ov2{margin-top:24px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:center}
+.wfig{margin:0;text-align:center;background:linear-gradient(180deg,#f4f8ff,#fff)}
+.wfig img{width:auto;height:auto;max-width:100%;max-height:640px;margin:0 auto;border-radius:8px;box-shadow:0 2px 10px rgba(19,48,110,.15)}
+.wfig figcaption{color:var(--mut);font-size:13px;margin-top:8px}
+.blu{color:#1d4ed8;font-weight:600}
+.sec{margin:28px 0 10px;color:#13306e}
+.pmtrow{display:grid;grid-template-columns:minmax(0,0.75fr) minmax(0,1.6fr);gap:24px;align-items:stretch}
+.pmtrow>.card:only-child{grid-column:1/-1}
+.tph{margin:0;display:flex;flex-direction:column;justify-content:center}
+.tph img{max-height:700px}
+.pmtc{margin:0}
+.pmth{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pmth h3{margin:0}
+.btn{background:linear-gradient(120deg,#13306e,#1d4ed8);color:#fff!important;text-decoration:none;
+ padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600}
+.pmtc iframe{width:100%;height:680px;border:0;border-radius:8px;background:#060c12;display:block;
+ box-shadow:0 2px 10px rgba(0,0,0,.25)}
+@media (max-width:860px){.ov,.pmtrow{grid-template-columns:1fr}}
+</style></head><body>
+<header><div class="hd">
+<div class="brand"><a class="lg" href="logo_full.png?v=202611121001" target="_blank" title="WbLS 30t logo"><img class="logo" src="logo.png?v=202611121001" alt="WbLS 30t logo"></a>
+<div class="hr"><h1>BNL 30-ton WbLS — detector monitor</h1>
+<div class="meta">
+ <span>Last update <b>2026-11-12 10:01</b></span>
+ <span>Newest muon day <b>2026-11-11 10:42</b></span>
+ <span>Newest calibration <b>2026-11-10</b></span>
+</div>
+<nav>
+ <a href="#overview" class="t-ov">Overview</a>
+ <a href="#bottom" class="t-bot">Bottom light yield</a><a href="#side" class="t-side">Side light yield</a>
+ <a href="#fits" class="t-fit">Daily fits</a><a href="#calibration" class="t-cal">Calibration</a><a href="#run2" class="hl">Run II</a><a href="#run1" class="hl hl1">Run I</a>
+</nav></div></div></div></header>
+<main>
+<section id="t-overview" class="tab">
+ <div class="tiles"><a class="tile" href="#bottom"><div class="lab">Bottom PMTs (without central PMT)</div><div class="num">1001<small> ± 11</small> PE <span class="pe">(photoelectron)</span></div><div class="sub">Landau MPV · 2026-11-11 10:42 · N = 556</div><div class="sub">trend since 2026-10-17: <b class="dn">-1.11 ± 0.34</b> PE/day</div></a><a class="tile" href="#side"><div class="lab">Side PMTs</div><div class="num">1701<small> ± 17</small> PE <span class="pe">(photoelectron)</span></div><div class="sub">Landau MPV · 2026-11-11 10:42 · N = 556</div><div class="sub">trend since 2026-10-17: <b class="dn">-2.54 ± 0.47</b> PE/day</div></a>
+  <a class="tile" href="#calibration"><div class="lab">Newest calibration</div>
+   <div class="num">2026-11-10</div><div class="sub">SPE fit of every PMT channel</div></a></div>
+ <div class="ov"><div class="card">
+<p>The <b>BNL 30-ton WbLS demonstrator</b> at Brookhaven National Laboratory (BNL) is a
+tonne-scale test bed for <b>water-based liquid scintillator</b> (WbLS): a mixture of
+water and a small fraction of organic liquid scintillator that produces both
+Cherenkov and scintillation light. The demonstrator is used to study how WbLS
+behaves at large scale over long periods — its optical stability, its light yield,
+and the handling and circulation of the liquid.</p>
+<p>Light in the tank is seen by photomultiplier tubes (PMTs) mounted on the
+<b>side wall</b> and on the <b>bottom</b> of the tank. Cosmic-ray muons crossing the
+detector are selected with plastic-scintillator <b>trigger paddles</b>; because these
+muons deposit a similar amount of energy every day, the light they produce is a
+direct monitor of the detector's light yield.</p>
+<h3>What this page monitors</h3>
+<ul>
+ <li><b>Light yield.</b> For every day of muon data, the summed charge of the Side PMTs and of
+   the Bottom PMTs (without the central PMT) is histogrammed and fitted with a Landau
+   function. The most probable value (MPV) is plotted versus date; a straight line
+   fitted to each stable period gives the trend in PE/day.</li>
+ <li><b>Calibration.</b> Dedicated source-calibration runs measure each PMT's single
+   photo-electron (SPE) response, so changes in PMT gain can be separated from changes
+   in the liquid.</li>
+</ul>
+<p class="mut">The page is rebuilt automatically after each run is processed.</p>
+</div><div class="card">
+<svg viewBox="0 0 520 430" role="img" aria-labelledby="dgT dgD" class="diagram">
+ <title id="dgT">Schematic of the 30-ton WbLS detector</title>
+ <desc id="dgD">Side view: cylindrical tank filled with WbLS, PMTs on the side wall and
+ bottom, muon trigger paddles above and below the tank, and a cosmic muon crossing it.</desc>
+ <defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+   <path d="M0,0 L10,5 L0,10 z" fill="var(--mu)"/></marker>
+ </defs>
+ <!-- paddles -->
+ <rect x="150" y="22" width="150" height="14" rx="2" class="pad"/>
+ <rect x="150" y="394" width="150" height="14" rx="2" class="pad"/>
+ <!-- tank -->
+ <rect x="90" y="70" width="270" height="300" rx="6" class="tank"/>
+ <rect x="96" y="96" width="258" height="268" rx="3" class="liq"/>
+ <path d="M96 96 h258" class="surf"/>
+ <!-- side PMTs: 4 rows on each wall -->
+ <g class="pmt">
+  <circle cx="104" cy="140" r="9"/><circle cx="104" cy="200" r="9"/>
+  <circle cx="104" cy="260" r="9"/><circle cx="104" cy="320" r="9"/>
+  <circle cx="346" cy="140" r="9"/><circle cx="346" cy="200" r="9"/>
+  <circle cx="346" cy="260" r="9"/><circle cx="346" cy="320" r="9"/>
+ </g>
+ <!-- bottom PMTs, central one highlighted -->
+ <g class="pmt">
+  <circle cx="150" cy="355" r="9"/><circle cx="188" cy="355" r="9"/>
+  <circle cx="262" cy="355" r="9"/><circle cx="300" cy="355" r="9"/>
+ </g>
+ <circle cx="225" cy="355" r="9" class="pmtc"/>
+ <!-- muon -->
+ <line x1="196" y1="4" x2="250" y2="424" class="muon" marker-end="url(#arr)"/>
+ <!-- labels -->
+ <g class="lbl">
+  <text x="310" y="33">top trigger paddle</text>
+  <text x="310" y="405">bottom trigger paddle</text>
+  <text x="225" y="230" text-anchor="middle" class="big">WbLS</text>
+  <text x="218" y="62" text-anchor="end" class="mutext">cosmic muon</text>
+  <text x="372" y="140">side PMTs</text>
+  <text x="372" y="156" class="mut2">(“Side”)</text>
+  <text x="372" y="350">bottom PMTs</text>
+  <text x="372" y="366" class="mut2">(“Bottom”, centre PMT</text>
+  <text x="372" y="381" class="mut2"> excluded in this plot)</text>
+  <text x="20" y="90" class="mut2">tank</text>
+ </g>
+ <line x1="368" y1="136" x2="356" y2="140" class="ldr"/>
+ <line x1="368" y1="346" x2="310" y2="355" class="ldr"/>
+ <line x1="40" y1="86" x2="90" y2="96" class="ldr"/>
+</svg>
+<p class="mut cap">Schematic side view, not to scale.</p>
+</div></div>
+<div class="ov ov2"><div class="card">
+<h3>WbLS composition</h3>
+<p><b>Water-based liquid scintillator</b> is mostly ultra-pure water with a small
+fraction of organic liquid scintillator dissolved in it. The scintillator has three
+ingredients: <b>DIN</b> (di-isopropylnaphthalene), an oily solvent that absorbs the
+energy of a passing charged particle; <b>PPO</b> (2,5-diphenyloxazole), the fluor that
+takes this energy from DIN and re-emits it as <span class="blu">blue light</span>; and
+<b>modified surfactants</b>, soap-like molecules with a water-loving head and an
+oil-loving tail.</p>
+<p>When the mixture is added to water, the surfactants wrap the DIN + PPO into tiny
+<b>micelles</b> (~100 nm): the tails hold the oil inside and the heads face the water.
+The droplets are much smaller than the wavelength of light, so the liquid stays
+<b>clear like water</b>. A muon crossing the tank therefore produces both
+<b>Cherenkov light</b> and <b>scintillation light</b>,
+and the light yield monitored on this page tracks the stability of that mixture.</p>
+</div><figure class="card wfig"><a href="wbls.png" target="_blank"><img src="wbls.png" alt="WbLS formulation cartoon: DIN solvent, PPO fluor and surfactants form micelles in water"></a><figcaption>WbLS formulation (cartoon)</figcaption></figure></div><div class="card nfc">
+<h3>Nanofiltration system</h3>
+<p class="nfdate">Nanofiltration integrated on 10 July 2026</p>
+<p>Over time, small amounts of dirt, such as rust from the steel tank, dissolve in the
+liquid and make it less clear, so less light reaches the PMTs. A normal water cleaner
+would also take out the scintillator. The <b>nanofiltration</b> system solves this: it
+cleans the water but keeps the scintillator in the tank.</p>
+<div class="flow">
+ <span class="fb">30-ton tank</span><span class="fa">→</span>
+ <span class="fb"><b>Filter 1</b><br>coarse membrane</span><span class="fa">→</span>
+ <span class="fb"><b>Filter 2</b><br>fine membrane</span><span class="fa">→</span>
+ <span class="fb">water + dirt<br>to dirt removal</span>
+</div>
+<p>The liquid is pumped through two very fine filters (membranes).
+<b>Filter 1</b> lets water through but is too fine for the tiny scintillator
+droplets (micelles), so they stay behind and are piped straight back to the tank. <b>Filter 2</b> is even finer and stops the few scintillator
+molecules that got through Filter 1; these also go back to the tank. What comes out
+after Filter 2 is water with the dissolved dirt in it but no scintillator. It goes to a
+separate purification step that removes the dirt. The system can clean the whole
+tank about once a day, and it runs automatically.</p>
+<p class="mut small">Details: S. Andrade <i>et al.</i>, <i>Design, construction, and operation of a
+30-ton Water-based Liquid Scintillator detector at Brookhaven National Laboratory</i>,
+<a href="https://iopscience.iop.org/article/10.1088/1748-0221/21/09/P09045" target="_blank">JINST 21 (2026) P09045</a>.</p>
+</div><h3 class="sec">The tank and its PMTs</h3><div class="pmtrow"><figure class="card wfig tph"><a href="tank_pmt_photo.jpg" target="_blank"><img src="tank_pmt_photo.jpg" alt="Inside the 30-ton tank, looking down: bottom PMTs on the floor and side PMTs on vertical ladders" loading="lazy"></a><figcaption><b>Inside the 30-ton tank</b> — looking down onto the 12 bottom PMTs; the 24 side PMTs are arranged in 6 columns and 4 rows.</figcaption></figure><div class="card pmtc"><div class="pmth"><h3>PMT layout — 12 bottom + 24 side PMTs</h3><a class="btn" href="pmt_layout.html?v=1794495679" target="_blank">Open full screen ↗</a></div><p class="mut small">Interactive 3-D view: drag to rotate, scroll to zoom, hover a PMT for its position. Use the buttons for top / front / side views.</p><iframe src="pmt_layout.html?v=1794495679" title="30-ton WbLS PMT layout" loading="lazy"></iframe></div></div>
+</section>
+<section id="t-run2" class="tab"><div class="banner"><b>Run II</b><span>light yield since 2026-10-17</span></div><h3>Bottom PMTs (without central PMT)</h3><figure><figcaption><b>Run II light yield — Bottom PMTs (without central PMT)</b><span>Landau MPV vs date from 2026-10-17 · pulse · all paddles</span></figcaption><a href="run2_bottom.png?v=202611121001" target="_blank" rel="noopener"><img src="run2_bottom.png?v=202611121001" alt="Run II light yield — Bottom PMTs (without central PMT)" loading="lazy"></a></figure><div class='notes'><div class='nh'>Notes on this plot</div><ul><li class='nodate'><span>Integrated with nanofilteration system</span></li></ul></div><div class='tw'><table><thead><tr><th>from</th><th>to</th><th class='r'>slope [PE/day]</th><th class='r'>± err</th><th class='r' title='slope × length of the period / mean MPV of the period'>change over period</th><th class='r'>days</th><th class='r' title='number of fitted data points'>points</th></tr></thead><tbody><tr><td>2026-10-17</td><td>2026-11-12 10:42</td><td class='r'>-1.108</td><td class='r'>0.342</td><td class='r'><b class='dn'>-2.81 %</b> ± 0.87</td><td class='r'>27</td><td class='r'>26</td></tr></tbody></table></div><p class='mut small'>Change over period = fitted slope × time between the first and last point ÷ mean MPV of the period (error from the slope error only).</p><h3>Side PMTs</h3><figure><figcaption><b>Run II light yield — Side PMTs</b><span>Landau MPV vs date from 2026-10-17 · pulse · all paddles</span></figcaption><a href="run2_side.png?v=202611121001" target="_blank" rel="noopener"><img src="run2_side.png?v=202611121001" alt="Run II light yield — Side PMTs" loading="lazy"></a></figure><div class='notes'><div class='nh'>Notes on this plot</div><ul><li class='nodate'><span>Integrated with nanofilteration system</span></li></ul></div><div class='tw'><table><thead><tr><th>from</th><th>to</th><th class='r'>slope [PE/day]</th><th class='r'>± err</th><th class='r' title='slope × length of the period / mean MPV of the period'>change over period</th><th class='r'>days</th><th class='r' title='number of fitted data points'>points</th></tr></thead><tbody><tr><td>2026-10-17</td><td>2026-11-12 10:42</td><td class='r'>-2.539</td><td class='r'>0.470</td><td class='r'><b class='dn'>-3.78 %</b> ± 0.70</td><td class='r'>27</td><td class='r'>26</td></tr></tbody></table></div><p class='mut small'>Change over period = fitted slope × time between the first and last point ÷ mean MPV of the period (error from the slope error only).</p></section>
+<section id="t-run1" class="tab"><div class="banner b1"><b>Run I</b><span>light yield, March 2025 – May 2026</span></div><h3>March – August 2025: pure water and WbLS injections</h3><figure><figcaption><b>Bottom PMTs — Landau MPV vs date</b><span>Pure water run, then injections 0.35 %, 0.7 % and 1.0 %; one linear fit per period</span></figcaption><a href="run1/bottom_before_250831.png?v=202611121001" target="_blank" rel="noopener"><img src="run1/bottom_before_250831.png?v=202611121001" alt="Bottom PMTs — Landau MPV vs date" loading="lazy"></a></figure><div class='notes'><div class='nh'>Notes on this plot</div><ul><li class='nodate'><span>Notes to be added.</span></li></ul></div><figure><figcaption><b>Side PMTs — Landau MPV vs date</b><span>Pure water run, then injections 0.35 %, 0.7 % and 1.0 %; one linear fit per period</span></figcaption><a href="run1/side_before_250831.png?v=202611121001" target="_blank" rel="noopener"><img src="run1/side_before_250831.png?v=202611121001" alt="Side PMTs — Landau MPV vs date" loading="lazy"></a></figure><div class='notes'><div class='nh'>Notes on this plot</div><ul><li class='nodate'><span>Notes to be added.</span></li></ul></div><h3>September 2025 – May 2026</h3><figure><figcaption><b>Bottom PMTs (without central PMT)</b><span>Landau MPV vs date, 2025-08-31 → 2026-05-17, with detector events marked</span></figcaption><a href="run1/Bottom_Without_Cent_PMT_250901_260517.png?v=202611121001" target="_blank" rel="noopener"><img src="run1/Bottom_Without_Cent_PMT_250901_260517.png?v=202611121001" alt="Bottom PMTs (without central PMT)" loading="lazy"></a></figure><div class='notes'><div class='nh'>Notes on this plot</div><ul><li class='nodate'><span>Notes to be added.</span></li></ul></div><figure><figcaption><b>Side PMTs</b><span>Landau MPV vs date, 2025-08-31 → 2026-05-17, with detector events marked</span></figcaption><a href="run1/Side_250901_260517.png?v=202611121001" target="_blank" rel="noopener"><img src="run1/Side_250901_260517.png?v=202611121001" alt="Side PMTs" loading="lazy"></a></figure><div class='notes'><div class='nh'>Notes on this plot</div><ul><li class='nodate'><span>Notes to be added.</span></li></ul></div></section>
+<section id="t-side" class="tab"><h2>Light yield — Side PMTs</h2><figure><figcaption><b>Light yield — Side PMTs</b><span>Landau MPV vs date · pulse charge · all trigger paddles</span></figcaption><a href="side.png?v=202611121001" target="_blank" rel="noopener"><img src="side.png?v=202611121001" alt="Light yield — Side PMTs" loading="lazy"></a></figure><div class='notes'><div class='nh'>Notes on this plot</div><ul><li><span class='nd'>2026-07-10</span><span>Nanofiltration system running: We have integrated the nanofiltration in the main loop. The first time after the 30-ton operation the nanofiltration is running.</span></li><li><span class='nd'>2026-09-05</span><span>After AC fix: The AC in the Bld 751 stopped working, It took significant time to fix AC.</span></li><li><span class='nd'>2026-10-07</span><span>DAQ re-wiring: We change all the wiring of the NIM and VME DAQ.</span></li></ul></div><h3>Run I (PMT 34 included) — change to 2026-05-17</h3><p class='mut'>End = mean of 2026-05-17: <b>1859.8 ± 3.0 PE</b> (Landau MPV, Run I series (source calibration, PMT 34 included)). Change = end / reference − 1; a reference value is the mean of all points of that day.</p><div class='tw'><table><thead><tr><th>reference day</th><th></th><th class='r'>MPV then [PE]</th><th class='r'>change to 2026-05-17</th></tr></thead><tbody><tr><td>2025-05-08</td><td>after 1 % injection</td><td class='r'>2259.5 ± 2.8 *</td><td class='r'><b class='dn'>-17.69 %</b> ± 0.17</td></tr><tr><td>2025-09-02</td><td>source calibration + SEA resin + nitrogen blanket</td><td class='r'>1824.4 ± 2.3</td><td class='r'><b class='up'>+1.94 %</b> ± 0.21</td></tr></tbody></table></div><p class='mut small'>* random trigger</p><h3>PMT 34 absent — change to now</h3><p class='mut'>Now = mean of 2026-11-12: <b>1701.1 ± 16.8 PE</b> (Landau MPV, plotted series). Change = now / reference − 1; a reference value is the mean of all points of that day.</p><div class='tw'><table><thead><tr><th>reference day</th><th></th><th class='r'>MPV then [PE]</th><th class='r'>change to now</th></tr></thead><tbody><tr><td>2026-05-01</td><td>PMT 34 absent from here</td><td class='r'>1776.5 ± 3.9</td><td class='r'><b class='dn'>-4.24 %</b> ± 0.97</td></tr><tr><td>2026-10-17</td><td>Run II start</td><td class='r'>1755.0 ± 12.6</td><td class='r'><b class='dn'>-3.07 %</b> ± 1.18</td></tr></tbody></table></div><h3>Change between periods — Run I (PMT 34 included)</h3><p class='mut'>Change = MPV(to) / MPV(from) − 1. Each value is the mean of all points of that day; both days of a row are taken from the same series.</p><div class='tw'><table><thead><tr><th>period</th><th>from</th><th>to</th><th class='r'>MPV from [PE]</th><th class='r'>MPV to [PE]</th><th class='r'>change</th></tr></thead><tbody><tr><td>1 % injection → source calibration + SEA resin + nitrogen blanket</td><td>2025-05-08</td><td>2025-09-02</td><td class='r'>2259.5 ± 2.8 *</td><td class='r'>1826.7 ± 2.4 *</td><td class='r'><b class='dn'>-19.15 %</b> ± 0.15</td></tr><tr><td>Run I (after filter change → end)</td><td>2025-09-02</td><td>2026-05-17</td><td class='r'>1824.4 ± 2.3</td><td class='r'>1859.8 ± 3.0</td><td class='r'><b class='up'>+1.94 %</b> ± 0.21</td></tr></tbody></table></div><p class='mut small'>* random trigger</p><h3>Change between periods — PMT 34 absent</h3><p class='mut'>Change = MPV(to) / MPV(from) − 1. Each value is the mean of all points of that day; both days of a row are taken from the same series.</p><div class='tw'><table><thead><tr><th>period</th><th>from</th><th>to</th><th class='r'>MPV from [PE]</th><th class='r'>MPV to [PE]</th><th class='r'>change</th></tr></thead><tbody><tr><td>PMT 34 absent → Run II start</td><td>2026-05-01</td><td>2026-10-17</td><td class='r'>1776.5 ± 3.9</td><td class='r'>1755.0 ± 12.6</td><td class='r'><b class='dn'>-1.21 %</b> ± 0.74</td></tr><tr><td>Run II</td><td>2026-10-17</td><td>2026-11-12</td><td class='r'>1755.0 ± 12.6</td><td class='r'>1701.1 ± 16.8</td><td class='r'><b class='dn'>-3.07 %</b> ± 1.18</td></tr></tbody></table></div><h3>Linear fit per period</h3><div class='tw'><table><thead><tr><th>from</th><th>to</th><th class='r'>slope [PE/day]</th><th class='r'>± err</th><th class='r'>days</th><th class='r' title='number of fitted data points'>points</th></tr></thead><tbody><tr><td>2026-05-01</td><td>2026-05-18</td><td class='r'>-0.444</td><td class='r'>0.303</td><td class='r'>18</td><td class='r'>62</td></tr><tr><td>2026-09-11</td><td>2026-10-02</td><td class='r'>+0.178</td><td class='r'>0.260</td><td class='r'>22</td><td class='r'>64</td></tr><tr><td>2026-10-17</td><td>2026-11-12 10:42</td><td class='r'>-2.539</td><td class='r'>0.470</td><td class='r'>27</td><td class='r'>26</td></tr></tbody></table></div></section>
+<section id="t-bottom" class="tab"><h2>Light yield — Bottom PMTs (without central PMT)</h2><figure><figcaption><b>Light yield — Bottom PMTs (without central PMT)</b><span>Landau MPV vs date · pulse charge · all trigger paddles</span></figcaption><a href="bottom_no_center.png?v=202611121001" target="_blank" rel="noopener"><img src="bottom_no_center.png?v=202611121001" alt="Light yield — Bottom PMTs (without central PMT)" loading="lazy"></a></figure><div class='notes'><div class='nh'>Notes on this plot</div><ul><li><span class='nd'>2026-07-10</span><span>Nanofiltration system running: We have integrated the nanofiltration in the main loop. The first time after the 30-ton operation the nanofiltration is running.</span></li><li><span class='nd'>2026-09-05</span><span>After AC fix: The AC in the Bld 751 stopped working, It took significant time to fix AC.</span></li><li><span class='nd'>2026-10-07</span><span>DAQ re-wiring: We change all the wiring of the NIM and VME DAQ.</span></li></ul></div><h3>Light-yield change to now</h3><p class='mut'>Now = mean of 2026-11-12: <b>1000.9 ± 10.9 PE</b> (Landau MPV, plotted series). Change = now / reference − 1; a reference value is the mean of all points of that day.</p><div class='tw'><table><thead><tr><th>reference day</th><th></th><th class='r'>MPV then [PE]</th><th class='r'>change to now</th></tr></thead><tbody><tr><td>2025-05-08</td><td>after 1 % injection</td><td class='r'>1163.5 ± 2.1 *</td><td class='r'><b class='dn'>-13.98 %</b> ± 0.95</td></tr><tr><td>2025-09-02</td><td>source calibration + SEA resin + nitrogen blanket</td><td class='r'>973.5 ± 1.8</td><td class='r'><b class='up'>+2.82 %</b> ± 1.13</td></tr><tr><td>2026-10-17</td><td>Run II start</td><td class='r'>1028.2 ± 7.6</td><td class='r'><b class='dn'>-2.66 %</b> ± 1.28</td></tr></tbody></table></div><p class='mut small'>* random trigger</p><h3>Change between periods</h3><p class='mut'>Change = MPV(to) / MPV(from) − 1. Each value is the mean of all points of that day; both days of a row are taken from the same series.</p><div class='tw'><table><thead><tr><th>period</th><th>from</th><th>to</th><th class='r'>MPV from [PE]</th><th class='r'>MPV to [PE]</th><th class='r'>change</th></tr></thead><tbody><tr><td>1 % injection → source calibration + SEA resin + nitrogen blanket</td><td>2025-05-08</td><td>2025-09-02</td><td class='r'>1163.5 ± 2.1 *</td><td class='r'>967.4 ± 1.7 *</td><td class='r'><b class='dn'>-16.86 %</b> ± 0.21</td></tr><tr><td>Run I (after filter change → end)</td><td>2025-09-02</td><td>2026-05-17</td><td class='r'>973.5 ± 1.8</td><td class='r'>983.2 ± 1.9</td><td class='r'><b class='up'>+1.00 %</b> ± 0.27</td></tr><tr><td>end of Run I → Run II start</td><td>2026-05-17</td><td>2026-10-17</td><td class='r'>983.6 ± 3.2</td><td class='r'>1028.2 ± 7.6</td><td class='r'><b class='up'>+4.53 %</b> ± 0.84</td></tr><tr><td>Run II</td><td>2026-10-17</td><td>2026-11-12</td><td class='r'>1028.2 ± 7.6</td><td class='r'>1000.9 ± 10.9</td><td class='r'><b class='dn'>-2.66 %</b> ± 1.28</td></tr></tbody></table></div><p class='mut small'>* random trigger</p><h3>Linear fit per period</h3><div class='tw'><table><thead><tr><th>from</th><th>to</th><th class='r'>slope [PE/day]</th><th class='r'>± err</th><th class='r'>days</th><th class='r' title='number of fitted data points'>points</th></tr></thead><tbody><tr><td>2026-05-01</td><td>2026-05-18</td><td class='r'>-0.633</td><td class='r'>0.308</td><td class='r'>18</td><td class='r'>64</td></tr><tr><td>2026-09-11</td><td>2026-10-02</td><td class='r'>+0.463</td><td class='r'>0.295</td><td class='r'>22</td><td class='r'>65</td></tr><tr><td>2026-10-17</td><td>2026-11-12 10:42</td><td class='r'>-1.108</td><td class='r'>0.342</td><td class='r'>27</td><td class='r'>26</td></tr></tbody></table></div></section>
+<section id="t-fits" class="tab"><h2>Daily fits — Side and Bottom</h2><div class="ctl"><label for="day">Day</label><button type="button" id="prev" aria-label="previous day">‹</button><select id="day"><option value="261016T1751">2026-10-17 17:51</option><option value="261018T1751">2026-10-19 17:51</option><option value="261019T1751">2026-10-20 17:51</option><option value="261020T1751">2026-10-21 17:51</option><option value="261021T1751">2026-10-22 17:51</option><option value="261022T1751">2026-10-23 17:51</option><option value="261023T1751">2026-10-24 17:51</option><option value="261024T1751">2026-10-25 17:51</option><option value="261025T1751">2026-10-26 17:51</option><option value="261026T1147">2026-10-27 11:47</option><option value="261027T1342">2026-10-28 13:42</option><option value="261028T1321">2026-10-29 13:21</option><option value="261029T1130">2026-10-30 11:30</option><option value="261030T1148">2026-10-31 11:48</option><option value="261031T1148">2026-11-01 11:48</option><option value="261101T1148">2026-11-02 11:48</option><option value="261102T1050">2026-11-03 10:50</option><option value="261103T1226">2026-11-04 12:26</option><option value="261104T1503">2026-11-05 15:03</option><option value="261105T1214">2026-11-06 12:14</option><option value="261106T1210">2026-11-07 12:10</option><option value="261107T1210">2026-11-08 12:10</option><option value="261108T1210">2026-11-09 12:10</option><option value="261109T1025">2026-11-10 10:25</option><option value="261110T1042">2026-11-11 10:42</option><option value="261111T1042" selected>2026-11-12 10:42</option></select><button type="button" id="next" aria-label="next day">›</button></div><div class="grid2"><figure><figcaption><b>Bottom PMTs (without central PMT)</b><span id="fit-bottom-txt"></span></figcaption><a id="fit-bottom-a" href="fits/bottom_261111T1042.png?v=202611121001" target="_blank" rel="noopener"><img id="fit-bottom-img" src="fits/bottom_261111T1042.png?v=202611121001" alt="Bottom PMTs (without central PMT) daily fit"></a></figure><figure><figcaption><b>Side PMTs</b><span id="fit-side-txt"></span></figcaption><a id="fit-side-a" href="fits/side_261111T1042.png?v=202611121001" target="_blank" rel="noopener"><img id="fit-side-img" src="fits/side_261111T1042.png?v=202611121001" alt="Side PMTs daily fit"></a></figure></div><p class="mut">Red: Landau fit. Blue: Landau ⊗ Gaussian (LanGaus) fit. The Landau MPV is the value plotted on the trend tabs.</p><script>const FITS={"261016T1751": {"bottom": {"mpv": 1028.22, "err": 7.56, "n": 954, "stamp": "261017T1751"}, "side": {"mpv": 1755.05, "err": 12.55, "n": 954, "stamp": "261017T1751"}}, "261018T1751": {"bottom": {"mpv": 1027.88, "err": 11.93, "n": 605, "stamp": "261019T1751"}, "side": {"mpv": 1782.44, "err": 16.66, "n": 605, "stamp": "261019T1751"}}, "261019T1751": {"bottom": {"mpv": 1018.99, "err": 11.74, "n": 572, "stamp": "261020T1751"}, "side": {"mpv": 1753.52, "err": 11.42, "n": 572, "stamp": "261020T1751"}}, "261020T1751": {"bottom": {"mpv": 1020.57, "err": 10.49, "n": 617, "stamp": "261021T1751"}, "side": {"mpv": 1743.38, "err": 11.94, "n": 617, "stamp": "261021T1751"}}, "261021T1751": {"bottom": {"mpv": 1041.36, "err": 13.8, "n": 634, "stamp": "261022T1751"}, "side": {"mpv": 1768.19, "err": 24.71, "n": 634, "stamp": "261022T1751"}}, "261022T1751": {"bottom": {"mpv": 1021.1, "err": 16.8, "n": 542, "stamp": "261023T1751"}, "side": {"mpv": 1751.83, "err": 20.66, "n": 542, "stamp": "261023T1751"}}, "261023T1751": {"bottom": {"mpv": 1023.34, "err": 12.41, "n": 588, "stamp": "261024T1751"}, "side": {"mpv": 1736.29, "err": 15.9, "n": 588, "stamp": "261024T1751"}}, "261024T1751": {"bottom": {"mpv": 1018.75, "err": 13.01, "n": 591, "stamp": "261025T1751"}, "side": {"mpv": 1730.99, "err": 14.88, "n": 591, "stamp": "261025T1751"}}, "261025T1751": {"bottom": {"mpv": 1006.41, "err": 10.15, "n": 503, "stamp": "261026T1751"}, "side": {"mpv": 1738.5, "err": 14.95, "n": 503, "stamp": "261026T1751"}}, "261026T1147": {"bottom": {"mpv": 1027.41, "err": 11.47, "n": 586, "stamp": "261027T1147"}, "side": {"mpv": 1726.75, "err": 14.99, "n": 586, "stamp": "261027T1147"}}, "261027T1342": {"bottom": {"mpv": 1042.88, "err": 8.59, "n": 522, "stamp": "261028T1342"}, "side": {"mpv": 1729.35, "err": 21.79, "n": 522, "stamp": "261028T1342"}}, "261028T1321": {"bottom": {"mpv": 1029.59, "err": 26.97, "n": 409, "stamp": "261029T1321"}, "side": {"mpv": 1731.59, "err": 17.43, "n": 409, "stamp": "261029T1321"}}, "261029T1130": {"bottom": {"mpv": 985.53, "err": 11.73, "n": 538, "stamp": "261030T1130"}, "side": {"mpv": 1730.4, "err": 24.75, "n": 538, "stamp": "261030T1130"}}, "261030T1148": {"bottom": {"mpv": 1023.85, "err": 15.34, "n": 508, "stamp": "261031T1148"}, "side": {"mpv": 1706.2, "err": 17.94, "n": 508, "stamp": "261031T1148"}}, "261031T1148": {"bottom": {"mpv": 1005.26, "err": 13.67, "n": 573, "stamp": "261101T1148"}, "side": {"mpv": 1759.42, "err": 32.1, "n": 573, "stamp": "261101T1148"}}, "261101T1148": {"bottom": {"mpv": 989.13, "err": 9.24, "n": 528, "stamp": "261102T1148"}, "side": {"mpv": 1669.65, "err": 16.63, "n": 528, "stamp": "261102T1148"}}, "261102T1050": {"bottom": {"mpv": 1006.22, "err": 11.99, "n": 558, "stamp": "261103T1050"}, "side": {"mpv": 1715.26, "err": 20.47, "n": 558, "stamp": "261103T1050"}}, "261103T1226": {"bottom": {"mpv": 998.49, "err": 10.21, "n": 548, "stamp": "261104T1226"}, "side": {"mpv": 1704.54, "err": 17.77, "n": 548, "stamp": "261104T1226"}}, "261104T1503": {"bottom": {"mpv": 997.71, "err": 9.21, "n": 423, "stamp": "261105T1503"}, "side": {"mpv": 1699.88, "err": 19.49, "n": 423, "stamp": "261105T1503"}}, "261105T1214": {"bottom": {"mpv": 1010.21, "err": 12.88, "n": 601, "stamp": "261106T1214"}, "side": {"mpv": 1714.06, "err": 12.12, "n": 601, "stamp": "261106T1214"}}, "261106T1210": {"bottom": {"mpv": 1009.54, "err": 11.9, "n": 556, "stamp": "261107T1210"}, "side": {"mpv": 1697.46, "err": 29.2, "n": 556, "stamp": "261107T1210"}}, "261107T1210": {"bottom": {"mpv": 1008.9, "err": 10.98, "n": 657, "stamp": "261108T1210"}, "side": {"mpv": 1721.88, "err": 20.33, "n": 657, "stamp": "261108T1210"}}, "261108T1210": {"bottom": {"mpv": 1023.46, "err": 13.63, "n": 526, "stamp": "261109T1210"}, "side": {"mpv": 1736.7, "err": 29.92, "n": 526, "stamp": "261109T1210"}}, "261109T1025": {"bottom": {"mpv": 987.95, "err": 7.7, "n": 513, "stamp": "261110T1025"}, "side": {"mpv": 1695.95, "err": 19.77, "n": 513, "stamp": "261110T1025"}}, "261110T1042": {"bottom": {"mpv": 1014.95, "err": 15.91, "n": 590, "stamp": "261111T1042"}, "side": {"mpv": 1701.39, "err": 15.13, "n": 590, "stamp": "261111T1042"}}, "261111T1042": {"bottom": {"mpv": 1000.89, "err": 10.86, "n": 556, "stamp": "261112T1042"}, "side": {"mpv": 1701.12, "err": 16.83, "n": 556, "stamp": "261112T1042"}}};const V="202611121001";</script></section>
+<section id="t-calibration" class="tab"><h2>Calibration</h2><h3>SPE fits — last 10 calibrations</h3><div class="ctl"><label for="cday">Calibration</label><button type="button" id="cprev" aria-label="previous calibration">‹</button><select id="cday"><option value="261028">2026-10-28</option><option value="261029">2026-10-29</option><option value="261030">2026-10-30</option><option value="261102">2026-11-02</option><option value="261103">2026-11-03</option><option value="261104">2026-11-04</option><option value="261105">2026-11-05</option><option value="261106">2026-11-06</option><option value="261109">2026-11-09</option><option value="261110" selected>2026-11-10</option></select><button type="button" id="cnext" aria-label="next calibration">›</button></div><div class="chips"><button type="button" class="chip" data-d="261028">2026-10-28</button><button type="button" class="chip" data-d="261029">2026-10-29</button><button type="button" class="chip" data-d="261030">2026-10-30</button><button type="button" class="chip" data-d="261102">2026-11-02</button><button type="button" class="chip" data-d="261103">2026-11-03</button><button type="button" class="chip" data-d="261104">2026-11-04</button><button type="button" class="chip" data-d="261105">2026-11-05</button><button type="button" class="chip" data-d="261106">2026-11-06</button><button type="button" class="chip" data-d="261109">2026-11-09</button><button type="button" class="chip on" data-d="261110">2026-11-10</button></div><figure><figcaption><b id="ctitle">SPE fits — calibration of 2026-11-10</b><span>Charge spectrum and single photo-electron fit per channel</span></figcaption><a id="ca" href="calib/spe_261110.png?v=202611121001" target="_blank" rel="noopener"><img id="cimg" src="calib/spe_261110.png?v=202611121001" alt="SPE fits"></a></figure><script>(function(){const s=document.getElementById('cday'),img=document.getElementById('cimg'),a=document.getElementById('ca'),t=document.getElementById('ctitle'),ch=[...document.querySelectorAll('.chip')];const V='202611121001';function show(){const d=s.value,u='calib/spe_'+d+'.png?v='+V;img.src=u;a.href=u;t.textContent='SPE fits — calibration of '+s.options[s.selectedIndex].text;ch.forEach(c=>c.classList.toggle('on',c.dataset.d===d));}s.addEventListener('change',show);document.getElementById('cprev').onclick=()=>{if(s.selectedIndex>0){s.selectedIndex--;show();}};document.getElementById('cnext').onclick=()=>{if(s.selectedIndex<s.options.length-1){s.selectedIndex++;show();}};ch.forEach(c=>c.onclick=()=>{s.value=c.dataset.d;show();});})();</script><figure><figcaption><b>SPE mean vs date</b><span>Per channel, from the source calibrations</span></figcaption><a href="calib_stability.png?v=202611121001" target="_blank" rel="noopener"><img src="calib_stability.png?v=202611121001" alt="SPE mean vs date" loading="lazy"></a></figure><figure><figcaption><b>Relative SPE stability</b><span>(value − start) / start [%], per channel</span></figcaption><a href="calib_relative.png?v=202611121001" target="_blank" rel="noopener"><img src="calib_relative.png?v=202611121001" alt="Relative SPE stability" loading="lazy"></a></figure></section>
+<footer>Updated automatically after each run is processed. Click a plot to open it full size.</footer>
+</main>
+<script>
+const TABS=["overview","bottom","side","fits","calibration","run2","run1"];
+function show(){
+ let t=location.hash.slice(1); if(!TABS.includes(t)) t="overview";
+ for(const k of TABS) document.getElementById("t-"+k).classList.toggle("on",k===t);
+ document.querySelectorAll("nav a").forEach(a=>{
+  if(a.hash==="#"+t) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");});
+ window.scrollTo(0,0);
+}
+addEventListener("hashchange",show); show();
+const sel=document.getElementById("day");
+if(sel){
+ const fmt=(o)=>o&&o.mpv!=null?`Landau MPV ${o.mpv.toFixed(1)} ± ${o.err.toFixed(1)} PE`+(o.n?` · N = ${o.n}`:""):"";
+ const upd=()=>{
+  const d=sel.value;
+  for(const k of ["side","bottom"]){
+   const img=document.getElementById(`fit-${k}-img`); if(!img) continue;
+   const has=FITS[d]&&k in FITS[d];
+   const src=has?`fits/${k}_${d}.png?v=${V}`:"";
+   img.src=src; document.getElementById(`fit-${k}-a`).href=src;
+   img.parentElement.parentElement.style.display=has?"":"none";
+   document.getElementById(`fit-${k}-txt`).textContent=has?fmt(FITS[d][k]):"";
+  }
+  document.getElementById("prev").disabled=sel.selectedIndex===0;
+  document.getElementById("next").disabled=sel.selectedIndex===sel.options.length-1;
+ };
+ sel.addEventListener("change",upd);
+ document.getElementById("prev").onclick=()=>{sel.selectedIndex--;upd();};
+ document.getElementById("next").onclick=()=>{sel.selectedIndex++;upd();};
+ upd();
+}
+</script>
+</body></html>
