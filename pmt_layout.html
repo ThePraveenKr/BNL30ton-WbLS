@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30-ton WbLS — PMT Layout</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #060c12;
+    --panel: #0b1520;
+    --border: #1a2d42;
+    --teal: #1de9b6;
+    --blue: #2979ff;
+    --amber: #ffab40;
+    --red: #ff5252;
+    --purple: #b388ff;
+    --text: #c8daea;
+    --muted: #4a6278;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    background: var(--panel);
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--teal);
+    letter-spacing: 0.04em;
+  }
+
+  header span {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    flex: 1;
+    gap: 0;
+  }
+
+  #canvas-wrap {
+    position: relative;
+    background: radial-gradient(ellipse at 40% 40%, #0a1e30 0%, #060c12 70%);
+    cursor: grab;
+  }
+  #canvas-wrap:active { cursor: grabbing; }
+
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .sidebar {
+    border-left: 1px solid var(--border);
+    background: var(--panel);
+    padding: 20px 18px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .s-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.72rem;
+    color: var(--text);
+    margin: 3px 0;
+  }
+
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat {
+    background: #0d1c2a;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .stat-label {
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .stat-val {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--teal);
+    margin-top: 2px;
+  }
+
+  .pmt-table {
+    font-size: 0.65rem;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .pmt-table th {
+    color: var(--muted);
+    text-align: left;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+  }
+
+  .pmt-table td {
+    padding: 3px 6px;
+    border-bottom: 1px solid #0f1e2c;
+    color: var(--text);
+  }
+
+  .pmt-table tr:hover td { background: #0d1c2a; }
+
+  .pmt-table .id-cell { color: var(--muted); }
+  .pmt-table .bot { color: var(--teal); }
+  .pmt-table .side { color: var(--amber); }
+
+  #hovered {
+    background: #091522;
+    border: 1px solid var(--teal);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.7rem;
+    min-height: 90px;
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+
+  #hovered .h-id { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--teal); }
+  #hovered .h-row { margin-top: 4px; color: var(--muted); }
+  #hovered .h-coords { color: var(--text); margin-top: 6px; line-height: 1.8; }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.68rem;
+  }
+
+  .ctrl-row label { color: var(--muted); width: 80px; flex-shrink: 0; }
+
+  input[type=range] {
+    flex: 1;
+    accent-color: var(--teal);
+    height: 3px;
+  }
+
+  .ctrl-val { color: var(--teal); width: 36px; text-align: right; }
+
+  .view-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .vbtn {
+    background: #0d1c2a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .vbtn:hover { border-color: var(--teal); color: var(--teal); }
+
+  .tip {
+    font-size: 0.63rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+</style>
+<style>/* added by build_site.py: fixed-height layout, canvas never stretched */
+html,body{height:100%;overflow:hidden}
+body{display:flex;flex-direction:column}
+.layout{flex:1;min-height:0}
+#canvas-wrap{position:relative;min-height:0;overflow:hidden}
+#canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%}
+.sidebar{min-height:0;overflow-y:auto}
+@media (max-width:760px){
+ html,body{height:auto;overflow:auto}
+ .layout{grid-template-columns:1fr}
+ #canvas-wrap{height:62vh}
+ .sidebar{border-left:0;border-top:1px solid var(--border)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>30-ton WbLS Detector — PMT Layout</h1>
+  <span>BNL · 36 PMTs · coordinates in mm</span>
+</header>
+
+<div class="layout">
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+  </div>
+
+  <div class="sidebar">
+    <div>
+      <div class="s-title">Legend</div>
+      <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+        <div class="legend-row"><div class="dot" style="background:#1de9b6"></div>Bottom PMT (ID 0–11) · facing +Z</div>
+        <div class="legend-row"><div class="dot" style="background:#ffab40"></div>Side PMT (ID 12–35) · facing inward</div>
+        <div class="legend-row"><div class="dot" style="background:#2979ff; opacity:0.3; border:1px solid #2979ff;"></div>Tank wall (schematic)</div>
+        <div class="legend-row"><div class="dot" style="background:#b388ff"></div>Hovered PMT</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="s-title">Detector Stats</div>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-label">Bottom PMTs</div><div class="stat-val">12</div></div>
+        <div class="stat"><div class="stat-label">Side PMTs</div><div class="stat-val">24</div></div>
+        <div class="stat"><div class="stat-label">Bottom Z</div><div class="stat-val" style="font-size:0.85rem">−1036 mm</div></div>
+        <div class="stat"><div class="stat-label">Side rows</div><div class="stat-val">4</div></div>
+        <div class="stat"><div class="stat-label">Z top row</div><div class="stat-val" style="font-size:0.85rem">+941 mm</div></div>
+        <div class="stat"><div class="stat-label">Z bot row</div><div class="stat-val" style="font-size:0.85rem">−945 mm</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="s-title">Side PMT Z rows</div>
+      <table class="pmt-table" style="margin-top:6px;">
+        <tr><th>Row</th><th>Z (mm)</th><th>Label</th><th>PMT IDs</th></tr>
+        <tr><td class="side">R1</td><td>+941.4</td><td style="color:#ff5252">top</td><td style="color:#4a6278">12,16,20,24,28,32</td></tr>
+        <tr><td class="side">R2</td><td>+312.75</td><td>upper-mid</td><td style="color:#4a6278">13,17,21,25,29,33</td></tr>
+        <tr><td class="side">R3</td><td>−315.9</td><td>lower-mid</td><td style="color:#4a6278">14,18,22,26,30,34</td></tr>
+        <tr><td class="side">R4</td><td>−944.55</td><td style="color:#1de9b6">bottom</td><td style="color:#4a6278">15,19,23,27,31,35</td></tr>
+      </table>
+    </div>
+
+    <div>
+      <div class="s-title">Hovered PMT</div>
+      <div id="hovered">
+        <div style="color:var(--muted); font-size:0.68rem;">Hover over a PMT to see details</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="s-title">View Controls</div>
+      <div class="controls">
+        <div class="ctrl-row">
+          <label>Rot X</label>
+          <input type="range" id="rx" min="-180" max="180" value="-25"/>
+          <span class="ctrl-val" id="rx-val">-25°</span>
+        </div>
+        <div class="ctrl-row">
+          <label>Rot Y</label>
+          <input type="range" id="ry" min="-180" max="180" value="30"/>
+          <span class="ctrl-val" id="ry-val">30°</span>
+        </div>
+        <div class="ctrl-row">
+          <label>Zoom</label>
+          <input type="range" id="zoom" min="0.3" max="2.5" step="0.05" value="1"/>
+          <span class="ctrl-val" id="zoom-val">1.0×</span>
+        </div>
+      </div>
+      <div class="view-btns" style="margin-top:10px;">
+        <button class="vbtn" onclick="setView(-25,30,1)">3D</button>
+        <button class="vbtn" onclick="setView(-90,0,1)">Top (XY)</button>
+        <button class="vbtn" onclick="setView(0,0,1)">Front (XZ)</button>
+        <button class="vbtn" onclick="setView(0,90,1)">Side (YZ)</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="s-title">Note</div>
+      <div class="tip">
+        Side PMTs are grouped in 6 columns of 4 rows.<br/>
+        Each column faces the tank centre.<br/>
+        dir_x,dir_y give the inward normal direction.<br/>
+        Bottom PMTs all face upward (dir_z = +1).
+        <br/><br/>
+        Drag canvas to rotate · scroll to zoom.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PMT data ──────────────────────────────────────────
+const bottom = {
+  x: [508.0, 285.0, -317.5, -698.5, -381.0, 412.8, 769.9, 0.0, -879.9, -934.9, 0.0, 1044.9],
+  y: [0.0, 494.9, 549.9, 0.0, -659.9, -714.9, 444.5, 952.5, 508.0, -539.8, -1143.0, -603.3],
+  z: Array(12).fill(-1035.95),
+  dx: Array(12).fill(0), dy: Array(12).fill(0), dz: Array(12).fill(1)
+};
+
+const side = {
+  x: [-1133.5,-1133.5,-1133.5,-1133.5,-566.75,-566.75,-566.75,-566.75,566.75,566.75,566.75,566.75,1133.5,1133.5,1133.5,1133.5,566.75,566.75,566.75,566.75,-566.75,-566.75,-566.75,-566.75],
+  y: [0,0,0,0,-981.64,-981.64,-981.64,-981.64,-981.64,-981.64,-981.64,-981.64,0,0,0,0,981.64,981.64,981.64,981.64,981.64,981.64,981.64,981.64],
+  z: [941.4,312.75,-315.9,-944.55,941.4,312.75,-315.9,-944.55,941.4,312.75,-315.9,-944.55,941.4,312.75,-315.9,-944.55,941.4,312.75,-315.9,-944.55,941.4,312.75,-315.9,-944.55],
+  dx: [1,1,1,1,0.5,0.5,0.5,0.5,-0.5,-0.5,-0.5,-0.5,-1,-1,-1,-1,-0.5,-0.5,-0.5,-0.5,0.5,0.5,0.5,0.5],
+  dy: [0,0,0,0,0.866,0.866,0.866,0.866,0.866,0.866,0.866,0.866,0,0,0,0,-0.866,-0.866,-0.866,-0.866,-0.866,-0.866,-0.866,-0.866],
+  dz: Array(24).fill(0)
+};
+
+// Build unified PMT list
+const pmts = [];
+for (let i = 0; i < 12; i++) {
+  pmts.push({ id: i, x: bottom.x[i], y: bottom.y[i], z: bottom.z[i],
+    dx: bottom.dx[i], dy: bottom.dy[i], dz: bottom.dz[i], type: 'bottom' });
+}
+for (let i = 0; i < 24; i++) {
+  const row = i % 4;
+  const col = Math.floor(i / 4);
+  const zLabels = ['+941', '+313', '−316', '−945'];
+  pmts.push({ id: i + 12, x: side.x[i], y: side.y[i], z: side.z[i],
+    dx: side.dx[i], dy: side.dy[i], dz: side.dz[i], type: 'side',
+    row: row + 1, col: col + 1, zLabel: zLabels[row] });
+}
+
+// ── Canvas setup ─────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+
+let rotX = -25, rotY = 30, zoom = 1;
+let dragging = false, lastMX = 0, lastMY = 0;
+let hoveredPMT = null;
+
+function resize() {
+  canvas.width  = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  draw();
+}
+window.addEventListener('resize', resize);
+
+// ── 3D → 2D projection ───────────────────────────────
+function project(x, y, z) {
+  // Normalise to [-1,1]
+  const scale = 0.00055 * zoom;
+  let nx = x * scale, ny = y * scale, nz = z * scale;
+
+  // Rotate X
+  const rx = rotX * Math.PI / 180;
+  const [ny1, nz1] = [ny * Math.cos(rx) - nz * Math.sin(rx), ny * Math.sin(rx) + nz * Math.cos(rx)];
+
+  // Rotate Y
+  const ry = rotY * Math.PI / 180;
+  const [nx2, nz2] = [nx * Math.cos(ry) + nz1 * Math.sin(ry), -nx * Math.sin(ry) + nz1 * Math.cos(ry)];
+
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const perspective = 3;
+  const d = perspective / (perspective + nz2);
+  return {
+    sx: cx + nx2 * Math.min(canvas.width, canvas.height) * 0.42 * d,
+    sy: cy - ny1 * Math.min(canvas.width, canvas.height) * 0.42 * d,
+    depth: nz2
+  };
+}
+
+// ── Draw tank outline (simplified cylinder) ───────────
+function drawTank() {
+  // Draw 6 vertical side lines at side PMT column x,y positions (schematic)
+  const cols = [
+    {x:-1133.5,y:0},{x:-566.75,y:-981.64},{x:566.75,y:-981.64},
+    {x:1133.5,y:0},{x:566.75,y:981.64},{x:-566.75,y:981.64}
+  ];
+  const zTop = 1100, zBot = -1100;
+
+  ctx.strokeStyle = 'rgba(41,121,255,0.12)';
+  ctx.lineWidth = 1;
+
+  // Vertical edges
+  cols.forEach(c => {
+    const t = project(c.x, c.y, zTop);
+    const b = project(c.x, c.y, zBot);
+    ctx.beginPath();
+    ctx.moveTo(t.sx, t.sy);
+    ctx.lineTo(b.sx, b.sy);
+    ctx.stroke();
+  });
+
+  // Top and bottom hexagon rings
+  [zTop, zBot, 0].forEach((zr, ri) => {
+    ctx.strokeStyle = ri === 2 ? 'rgba(41,121,255,0.06)' : 'rgba(41,121,255,0.15)';
+    ctx.setLineDash(ri === 2 ? [4,6] : []);
+    ctx.beginPath();
+    cols.forEach((c, i) => {
+      const p = project(c.x, c.y, zr);
+      i === 0 ? ctx.moveTo(p.sx, p.sy) : ctx.lineTo(p.sx, p.sy);
+    });
+    ctx.closePath();
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // Z axis (muon track)
+  const za = project(0, 0, 1200);
+  const zb = project(0, 0, -1100);
+  ctx.strokeStyle = 'rgba(179,136,255,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(za.sx, za.sy);
+  ctx.lineTo(zb.sx, zb.sy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Muon arrow
+  ctx.strokeStyle = 'rgba(179,136,255,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(za.sx, za.sy);
+  const zm = project(0, 0, 900);
+  ctx.lineTo(zm.sx, zm.sy);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(179,136,255,0.7)';
+  ctx.font = '11px JetBrains Mono';
+  ctx.fillText('μ', za.sx + 5, za.sy + 4);
+}
+
+// ── Draw PMTs ─────────────────────────────────────────
+function drawPMTs() {
+  // Sort by depth for painter's algorithm
+  const projected = pmts.map(p => {
+    const pos = project(p.x, p.y, p.z);
+    // Direction arrow endpoint
+    const dscale = 220;
+    const dpos = project(p.x + p.dx * dscale, p.y + p.dy * dscale, p.z + p.dz * dscale);
+    return { ...p, pos, dpos };
+  }).sort((a, b) => a.pos.depth - b.pos.depth);
+
+  projected.forEach(p => {
+    const isHovered = hoveredPMT && hoveredPMT.id === p.id;
+    const isSide = p.type === 'side';
+    const baseCol = isSide ? '#ffab40' : '#1de9b6';
+    const r = isHovered ? 11 : 7;
+
+    // Draw direction arrow
+    ctx.strokeStyle = isHovered ? '#b388ff' : (isSide ? 'rgba(255,171,64,0.35)' : 'rgba(29,233,182,0.35)');
+    ctx.lineWidth = isHovered ? 1.5 : 0.8;
+    ctx.beginPath();
+    ctx.moveTo(p.pos.sx, p.pos.sy);
+    ctx.lineTo(p.dpos.sx, p.dpos.sy);
+    ctx.stroke();
+
+    // Glow
+    if (isHovered) {
+      const grad = ctx.createRadialGradient(p.pos.sx, p.pos.sy, 0, p.pos.sx, p.pos.sy, 22);
+      grad.addColorStop(0, 'rgba(179,136,255,0.4)');
+      grad.addColorStop(1, 'rgba(179,136,255,0)');
+      ctx.beginPath();
+      ctx.arc(p.pos.sx, p.pos.sy, 22, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    // PMT circle
+    ctx.beginPath();
+    ctx.arc(p.pos.sx, p.pos.sy, r, 0, Math.PI * 2);
+    ctx.fillStyle = isHovered ? '#b388ff' : baseCol;
+    ctx.fill();
+    ctx.strokeStyle = isHovered ? '#fff' : 'rgba(0,0,0,0.4)';
+    ctx.lineWidth = isHovered ? 1.5 : 0.5;
+    ctx.stroke();
+
+    // ID label
+    ctx.fillStyle = isHovered ? '#fff' : (isSide ? 'rgba(255,171,64,0.8)' : 'rgba(29,233,182,0.8)');
+    ctx.font = `${isHovered ? '600 ' : ''}${isHovered ? 11 : 9}px JetBrains Mono`;
+    ctx.textAlign = 'center';
+    ctx.fillText(p.id, p.pos.sx, p.pos.sy - r - 3);
+  });
+
+  return projected;
+}
+
+// ── Main draw ─────────────────────────────────────────
+let projectedCache = [];
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawTank();
+  projectedCache = drawPMTs();
+}
+
+// ── Interaction ───────────────────────────────────────
+wrap.addEventListener('mousedown', e => {
+  dragging = true;
+  lastMX = e.clientX;
+  lastMY = e.clientY;
+});
+window.addEventListener('mouseup', () => dragging = false);
+window.addEventListener('mousemove', e => {
+  if (dragging) {
+    rotY += (e.clientX - lastMX) * 0.5;
+    rotX += (e.clientY - lastMY) * 0.5;
+    lastMX = e.clientX;
+    lastMY = e.clientY;
+    draw();
+  }
+  // Hover detection
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  let closest = null, minDist = 18;
+  projectedCache.forEach(p => {
+    const d = Math.hypot(p.pos.sx - mx, p.pos.sy - my);
+    if (d < minDist) { minDist = d; closest = p; }
+  });
+  if (closest !== hoveredPMT) {
+    hoveredPMT = closest;
+    draw();
+    updateHoverPanel();
+  }
+});
+
+wrap.addEventListener('wheel', e => {
+  zoom *= e.deltaY < 0 ? 1.08 : 0.93;
+  zoom = Math.max(0.3, Math.min(3, zoom));
+  document.getElementById('zoom').value = zoom;
+  document.getElementById('zoom-val').textContent = zoom.toFixed(2) + '×';
+  draw();
+}, {passive: true});
+
+function updateHoverPanel() {
+  const el = document.getElementById('hovered');
+  if (!hoveredPMT) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:0.68rem;">Hover over a PMT to see details</div>';
+    return;
+  }
+  const p = hoveredPMT;
+  const dist = Math.sqrt(p.x**2 + p.y**2 + p.z**2).toFixed(0);
+  const distCentre = Math.sqrt(p.x**2 + p.y**2).toFixed(0);
+  const rowInfo = p.type === 'side' ? `Row ${p.row} · Col ${p.col} · Z = ${p.zLabel} mm` : 'Bottom face · Z = −1036 mm';
+  el.innerHTML = `
+    <div class="h-id">PMT ${p.id}</div>
+    <div class="h-row" style="color:${p.type==='side'?'#ffab40':'#1de9b6'}">${p.type.toUpperCase()} · ${rowInfo}</div>
+    <div class="h-coords">
+      x = ${p.x.toFixed(1)} mm<br/>
+      y = ${p.y.toFixed(1)} mm<br/>
+      z = ${p.z.toFixed(1)} mm<br/>
+      r_xy = ${distCentre} mm (radial)<br/>
+      |r| = ${dist} mm (from origin)<br/>
+      dir = (${p.dx}, ${p.dy}, ${p.dz})
+    </div>`;
+}
+
+// ── Sliders ───────────────────────────────────────────
+document.getElementById('rx').addEventListener('input', function() {
+  rotX = +this.value;
+  document.getElementById('rx-val').textContent = this.value + '°';
+  draw();
+});
+document.getElementById('ry').addEventListener('input', function() {
+  rotY = +this.value;
+  document.getElementById('ry-val').textContent = this.value + '°';
+  draw();
+});
+document.getElementById('zoom').addEventListener('input', function() {
+  zoom = +this.value;
+  document.getElementById('zoom-val').textContent = (+this.value).toFixed(2) + '×';
+  draw();
+});
+
+function setView(rx, ry, z) {
+  rotX = rx; rotY = ry; zoom = z;
+  document.getElementById('rx').value = rx;
+  document.getElementById('ry').value = ry;
+  document.getElementById('zoom').value = z;
+  document.getElementById('rx-val').textContent = rx + '°';
+  document.getElementById('ry-val').textContent = ry + '°';
+  document.getElementById('zoom-val').textContent = z.toFixed(2) + '×';
+  draw();
+}
+
+resize();
+setView(-90, 0, 1);
+</script>
+</body>
+</html>
